@@ -1,10 +1,18 @@
 # Node OAuth2 Server Implementation (MySQL as default)
 
 This is a fork from origin manjeshpv/node-oauth2-server-implementation
-- use mysql as a default
+- use MySQL as a default
 - update to latest oauth2-server 3.0.0-b4
-- some minor fix on scope
-- update postman script for testing
+- some minor fix on scope and seed
+- update postman script link
+
+## Create and Config MySQL docker instance
+
+```
+docker run --name mysql -e MYSQL_ROOT_PASSWORD=password -d -p 3306:3306 mysql/mysql-server:5.7
+
+docker exec -it mysql mysql -uroot -ppassword -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'password' WITH GRANT OPTION; FLUSH PRIVILEGES; CREATE DATABASE oauth_demo;"
+```
 
 ## Installation
 
@@ -85,7 +93,7 @@ app.listen(3000);
 
 After running with node, visting http://127.0.0.1:3000 should present you with a json response saying your access token could not be found.
 
-To simulate, Use Postman: https://www.getpostman.com/collections/37afd82600127fbeef28
+To simulate, Use Postman: https://www.getpostman.com/collections/98121e864773bd01eea8
 
 ## Features
 
