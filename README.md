@@ -1,6 +1,10 @@
-# Node OAuth2 Server Implementation
+# Node OAuth2 Server Implementation (MySQL as default)
 
-Supports `    "oauth2-server": "^3.0.0-b2",`
+This is a fork from origin manjeshpv/node-oauth2-server-implementation
+- use mysql as a default
+- update to latest oauth2-server 3.0.0-b4
+- some minor fix on scope
+- update postman script for testing
 
 ## Installation
 
