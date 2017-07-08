@@ -17,7 +17,7 @@ docker exec -it mysql mysql -uroot -ppassword -e "GRANT ALL PRIVILEGES ON *.* TO
 ## Installation
 
 ```
-git clone https://github.com/manjeshpv/node-oauth2-server-implementation
+git clone https://github.com/hardyscc/node-oauth2-server-implementation
 npm install
 npm start or node ./bin/www
 ```
