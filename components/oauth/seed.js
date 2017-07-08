@@ -5,11 +5,11 @@
  * to disable, edit config/environment/index.js, and set `seedDB: false`
  */
 
-'use strict';
+'use strict'
 var config = require('./../../config')
-var sqldb = require('./sqldb');
+var sqldb = require('./sqldb')
 
-var Thing = sqldb.Thing;
+var Thing = sqldb.Thing
 var OAuthAccessToken = sqldb.OAuthAccessToken
 var OAuthAuthorizationCode = sqldb.OAuthAuthorizationCode
 var OAuthClient = sqldb.OAuthClient
@@ -18,21 +18,25 @@ var OAuthScope = sqldb.OAuthScope
 var User = sqldb.User
 
 User.sync({force:config.seedDBForce}).then(function() {
-  return User.destroy({ where: {} });
+  return User.destroy({ where: {} })
 })
 .then(function() {
-  return User.bulkCreate([{username:'admin',password:'admin',scope:'profile'}])
+  return User.bulkCreate([{
+    username:'admin',
+    password:'admin',
+    scope:'profile'
+  }])
 })
 .then(function() {
-  return User.findOne({where:{username: 'admin'}})
+  return User.findOne({ where: { username: 'admin' } })
 })
 .then(function(user) {
 
   OAuthClient.sync({force:config.seedDBForce}).then(function() {
-     return OAuthClient.destroy({ where: {} });
+     return OAuthClient.destroy({ where: {} })
   })
   .then(function() {
-    OAuthClient.bulkCreate([{
+    return OAuthClient.bulkCreate([{
       client_id:'democlient',
       client_secret:'democlientsecret',
       redirect_uri:'http://localhost/cb',
@@ -47,10 +51,10 @@ User.sync({force:config.seedDBForce}).then(function() {
     OAuthAuthorizationCode.sync({force:config.seedDBForce})
 
     OAuthScope.sync({force:config.seedDBForce}).then(function() {
-      return OAuthScope.destroy({ where: {} });
+      return OAuthScope.destroy({ where: {} })
     })
     .then(function() {
-      OAuthScope.bulkCreate([{scope:'profile'}])
+      OAuthScope.bulkCreate([{ scope: 'profile' }])
     })
 
     //Thing.sync({force:config.seedDBForce})
