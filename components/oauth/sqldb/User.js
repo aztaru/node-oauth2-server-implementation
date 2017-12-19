@@ -3,8 +3,8 @@
  */
 'use strict';
 
-module.exports = function(sequelize, DataTypes) {
-  var User = sequelize.define('User',  {
+module.exports = function (sequelize, DataTypes) {
+  var User = sequelize.define('User', {
     id: {
       type: DataTypes.INTEGER(11),
       autoIncrement: true,
@@ -13,19 +13,19 @@ module.exports = function(sequelize, DataTypes) {
       unique: true,
     },
     username: DataTypes.STRING(32),
-    password: DataTypes.STRING(32),
+    password: DataTypes.STRING(64),
     scope: DataTypes.STRING
   }, {
-    tableName: 'users', // oauth_users
-    timestamps: false,
-    underscored: true,
+      tableName: 'users', // oauth_users
+      timestamps: false,
+      underscored: true,
 
-    classMethods: {
-      associate: function associate(models) {
-        //User.hasMany(models.OAuthClient);
+      classMethods: {
+        associate: function associate(models) {
+          //User.hasMany(models.OAuthClient);
+        },
       },
-    },
-  });
+    });
 
   return User;
 }

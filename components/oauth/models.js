@@ -4,6 +4,7 @@
 
 var _ = require('lodash');
 var sqldb = require('./sqldb');
+var bcrypt = require('bcrypt');
 var User = sqldb.User;
 var OAuthClient = sqldb.OAuthClient;
 var OAuthAccessToken = sqldb.OAuthAccessToken;
@@ -13,8 +14,8 @@ var OAuthRefreshToken = sqldb.OAuthRefreshToken;
 function getAccessToken(bearerToken) {
   return OAuthAccessToken
     .findOne({
-      where: {access_token: bearerToken},
-      attributes: [['access_token', 'accessToken'], ['expires', 'accessTokenExpiresAt'],'scope'],
+      where: { access_token: bearerToken },
+      attributes: [['access_token', 'accessToken'], ['expires', 'accessTokenExpiresAt'], 'scope'],
       include: [
         {
           model: User,
@@ -37,7 +38,7 @@ function getAccessToken(bearerToken) {
 
 function getClient(clientId, clientSecret) {
   const options = {
-    where: {client_id: clientId},
+    where: { client_id: clientId },
     attributes: ['id', 'client_id', 'redirect_uri', 'scope'],
   };
   if (clientSecret) options.where.client_secret = clientSecret;
@@ -63,11 +64,11 @@ function getClient(clientId, clientSecret) {
 function getUser(username, password) {
   return User
     .findOne({
-      where: {username: username},
+      where: { username: username },
       attributes: ['id', 'username', 'password', 'scope'],
     })
     .then(function (user) {
-      return user.password === password ? user.toJSON() : false;
+      return bcrypt.compareSync(password, user.password) ? user.toJSON() : false;
     })
     .catch(function (err) {
       console.log("getUser - Err: ", err)
@@ -119,22 +120,22 @@ function revokeToken(token) {
 
 function saveToken(token, client, user) {
   return Promise.all([
-      OAuthAccessToken.create({
-        access_token: token.accessToken,
-        expires: token.accessTokenExpiresAt,
-        client_id: client.id,
-        user_id: user.id,
-        scope: token.scope
-      }),
-      token.refreshToken ? OAuthRefreshToken.create({ // no refresh token for client_credentials
-        refresh_token: token.refreshToken,
-        expires: token.refreshTokenExpiresAt,
-        client_id: client.id,
-        user_id: user.id,
-        scope: token.scope
-      }) : [],
+    OAuthAccessToken.create({
+      access_token: token.accessToken,
+      expires: token.accessTokenExpiresAt,
+      client_id: client.id,
+      user_id: user.id,
+      scope: token.scope
+    }),
+    token.refreshToken ? OAuthRefreshToken.create({ // no refresh token for client_credentials
+      refresh_token: token.refreshToken,
+      expires: token.refreshTokenExpiresAt,
+      client_id: client.id,
+      user_id: user.id,
+      scope: token.scope
+    }) : [],
 
-    ])
+  ])
     .then(function (resultsArray) {
       return _.assign(  // expected to return client and user, but not returning
         {
@@ -155,7 +156,7 @@ function getAuthorizationCode(code) {
   return OAuthAuthorizationCode
     .findOne({
       attributes: ['client_id', 'expires', 'user_id', 'scope'],
-      where: {authorization_code: code},
+      where: { authorization_code: code },
       include: [User, OAuthClient]
     })
     .then(function (authCodeModel) {
@@ -194,7 +195,7 @@ function saveAuthorizationCode(code, client, user) {
 
 function getUserFromClient(client) {
   var options = {
-    where: {client_id: client.client_id},
+    where: { client_id: client.client_id },
     include: [User],
     attributes: ['id', 'client_id', 'redirect_uri'],
   };
@@ -217,7 +218,7 @@ function getRefreshToken(refreshToken) {
   return OAuthRefreshToken
     .findOne({
       attributes: ['client_id', 'user_id', 'expires'],
-      where: {refresh_token: refreshToken},
+      where: { refresh_token: refreshToken },
       include: [OAuthClient, User]
 
     })
@@ -242,7 +243,7 @@ function validateScope(user, client, scope) {
 }
 
 function verifyScope(token, scope) {
-    return token.scope === scope
+  return token.scope === scope
 }
 
 module.exports = {

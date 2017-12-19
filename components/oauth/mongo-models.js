@@ -4,6 +4,7 @@
 
 var _ = require('lodash');
 var mongodb = require('./mongodb');
+var bcrypt = require('bcrypt')
 var User = mongodb.User;
 var OAuthClient = mongodb.OAuthClient;
 var OAuthAccessToken = mongodb.OAuthAccessToken;
@@ -11,14 +12,14 @@ var OAuthAuthorizationCode = mongodb.OAuthAuthorizationCode;
 var OAuthRefreshToken = mongodb.OAuthRefreshToken;
 
 function getAccessToken(bearerToken) {
-  console.log("getAccessToken",bearerToken)
+  console.log("getAccessToken", bearerToken)
   return OAuthAccessToken
-  //User,OAuthClient
-    .findOne({access_token: bearerToken})
+    //User,OAuthClient
+    .findOne({ access_token: bearerToken })
     .populate('User')
     .populate('OAuthClient')
     .then(function (accessToken) {
-      console.log('at',accessToken)
+      console.log('at', accessToken)
       if (!accessToken) return false;
       var token = accessToken;
       token.user = token.User;
@@ -32,8 +33,8 @@ function getAccessToken(bearerToken) {
 }
 
 function getClient(clientId, clientSecret) {
-  console.log("getClient",clientId, clientSecret)
-  const options = {client_id: clientId};
+  console.log("getClient", clientId, clientSecret)
+  const options = { client_id: clientId };
   if (clientSecret) options.client_secret = clientSecret;
 
   return OAuthClient
@@ -56,10 +57,10 @@ function getClient(clientId, clientSecret) {
 
 function getUser(username, password) {
   return User
-    .findOne({username: username})
+    .findOne({ username: username })
     .then(function (user) {
-      console.log("u",user)
-      return user.password === password ? user : false;
+      console.log("u", user)
+      return bcrypt.compareSync(password, user.password) ? user : false;
     })
     .catch(function (err) {
       console.log("getUser - Err: ", err)
@@ -67,7 +68,7 @@ function getUser(username, password) {
 }
 
 function revokeAuthorizationCode(code) {
-  console.log("revokeAuthorizationCode",code)
+  console.log("revokeAuthorizationCode", code)
   return OAuthAuthorizationCode.findOne({
     where: {
       authorization_code: code.code
@@ -89,7 +90,7 @@ function revokeAuthorizationCode(code) {
 }
 
 function revokeToken(token) {
-  console.log("revokeToken",token)
+  console.log("revokeToken", token)
   return OAuthRefreshToken.findOne({
     where: {
       refresh_token: token.refreshToken
@@ -112,24 +113,24 @@ function revokeToken(token) {
 
 
 function saveToken(token, client, user) {
-  console.log("saveToken",token, client, user)
+  console.log("saveToken", token, client, user)
   return Promise.all([
-      OAuthAccessToken.create({
-        access_token: token.accessToken,
-        expires: token.accessTokenExpiresAt,
-        OAuthClient: client._id,
-        User: user._id,
-        scope: token.scope
-      }),
-      token.refreshToken ? OAuthRefreshToken.create({ // no refresh token for client_credentials
-        refresh_token: token.refreshToken,
-        expires: token.refreshTokenExpiresAt,
-        OAuthClient: client._id,
-        User: user._id,
-        scope: token.scope
-      }) : [],
+    OAuthAccessToken.create({
+      access_token: token.accessToken,
+      expires: token.accessTokenExpiresAt,
+      OAuthClient: client._id,
+      User: user._id,
+      scope: token.scope
+    }),
+    token.refreshToken ? OAuthRefreshToken.create({ // no refresh token for client_credentials
+      refresh_token: token.refreshToken,
+      expires: token.refreshTokenExpiresAt,
+      OAuthClient: client._id,
+      User: user._id,
+      scope: token.scope
+    }) : [],
 
-    ])
+  ])
     .then(function (resultsArray) {
       return _.assign(  // expected to return client and user, but not returning
         {
@@ -147,9 +148,9 @@ function saveToken(token, client, user) {
 }
 
 function getAuthorizationCode(code) {
-  console.log("getAuthorizationCode",code)
+  console.log("getAuthorizationCode", code)
   return OAuthAuthorizationCode
-    .findOne({authorization_code: code})
+    .findOne({ authorization_code: code })
     .populate('User')
     .populate('OAuthClient')
     .then(function (authCodeModel) {
@@ -170,7 +171,7 @@ function getAuthorizationCode(code) {
 }
 
 function saveAuthorizationCode(code, client, user) {
-  console.log("saveAuthorizationCode",code, client, user)
+  console.log("saveAuthorizationCode", code, client, user)
   return OAuthAuthorizationCode
     .create({
       expires: code.expiresAt,
@@ -189,7 +190,7 @@ function saveAuthorizationCode(code, client, user) {
 
 function getUserFromClient(client) {
   console.log("getUserFromClient", client)
-  var options = {client_id: client.client_id};
+  var options = { client_id: client.client_id };
   if (client.client_secret) options.client_secret = client.client_secret;
 
   return OAuthClient
@@ -208,13 +209,13 @@ function getUserFromClient(client) {
 function getRefreshToken(refreshToken) {
   console.log("getRefreshToken", refreshToken)
   if (!refreshToken || refreshToken === 'undefined') return false
-//[OAuthClient, User]
+  //[OAuthClient, User]
   return OAuthRefreshToken
-    .findOne({refresh_token: refreshToken})
+    .findOne({ refresh_token: refreshToken })
     .populate('User')
     .populate('OAuthClient')
     .then(function (savedRT) {
-      console.log("srt",savedRT)
+      console.log("srt", savedRT)
       var tokenTemp = {
         user: savedRT ? savedRT.User : {},
         client: savedRT ? savedRT.OAuthClient : {},
@@ -231,13 +232,13 @@ function getRefreshToken(refreshToken) {
 }
 
 function validateScope(token, client, scope) {
-    console.log("validateScope", token, client, scope)
-    return (user.scope === client.scope) ? scope : false
+  console.log("validateScope", token, client, scope)
+  return (user.scope === client.scope) ? scope : false
 }
 
 function verifyScope(token, scope) {
-    console.log("verifyScope", token, scope)
-    return token.scope === scope
+  console.log("verifyScope", token, scope)
+  return token.scope === scope
 }
 module.exports = {
   //generateOAuthAccessToken, optional - used for jwt
