@@ -5,11 +5,11 @@
 module.exports = {
   sql: {
     database: 'oauth_demo',
-    username: 'root',
+    username: 'user',
     password: 'password',
     dialect: 'mysql', // PostgreSQL, MySQL, MariaDB, SQLite and MSSQL See more: http://docs.sequelizejs.com/en/latest/
     logging: true,
-    timezone: '+05:30',
+    timezone: '+08:00',
   },
   mongo: {
     uri: 'mongodb://gloryque:intranet@192.168.0.200:27017/gloryque_quarc'
