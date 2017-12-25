@@ -33,13 +33,13 @@ require('./components/oauth')(app)
 /** Control Private through OAuth **/
 
 app.use('/', routes);
-app.use('/users', users);
+// app.use('/users', users);
 
-app.get('/secure', authenticate(), function(req,res){
-  res.json({message: 'Secure data'})
-});
+// app.get('/secure', authenticate(), function(req,res){
+//   res.json({message: 'Secure data'})
+// });
 
-app.get('/me', authenticate(), function(req,res){
+app.get('/oauth/tokeninfo', authenticate(), function(req,res){
   res.json({
     me: req.user,
     messsage: 'Authorization success, Without Scopes, Try accessing /profile with `profile` scope',
@@ -48,11 +48,11 @@ app.get('/me', authenticate(), function(req,res){
   })
 });
 
-app.get('/profile', authenticate({scope:'profile'}), function(req,res){
-  res.json({
-    profile: req.user
-  })
-});
+// app.get('/profile', authenticate({scope:'profile'}), function(req,res){
+//   res.json({
+//     profile: req.user
+//   })
+// });
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
